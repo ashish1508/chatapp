@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    
+  </head>
+  <body>
+    <h1>welcome to chat</h1>
+    <p id='nool'></p>
+    <ul id='online'></ul>
+    <div id='typing'></div>
+    <ul id="messages"></ul>
+    <form action="" id='f1'>
+      <input id="m" autocomplete="off" /><button>Send</button><br><br>
+    </form>
+   
+    
+    <script src="../socket.io/socket.io.js"></script>
+   
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      $(function () {
+        var socket = io();
+        var receiver;
+        var sender;
+        $('#f1').keydown(function(){
+          socket.emit('typing',{
+            sname:sender,
+            rname:receiver
+          });
+        })
+        $('#f1').submit(function(){
+          
+          socket.emit('chat message', {
+            msg : $('#m').val(),
+            sname : sender,
+            rname : receiver
+          });
+          $('#m').val('');
+
+          return false;
+          });
+        $('#f2').submit(function(){
+          socket.emit('adduser', $('#nam').val());
+          sender = $('#nam').val();
+          $('#nam').val('');
+          return false;
+          });
+        $('#f3').submit(function(){
+          //socket.emit('user', $('#opp').val());
+
+          receiver = $('#opp').val();
+          
+          $('#opp').val('');
+          return false;
+          });
+          setInterval(function(){
+            socket.emit('getolusers',"please send data");
+          },3000)
+          
+          socket.on('olusers',function(olusers){
+            console.log('online'+olusers);
+              $('#online').empty();
+            if(olusers.length>0){
+                for(x in olusers){
+                $('#online').append($('<li>').text(olusers[x].name));
+              }
+            }else{
+              $('#nool').text("no one is online");
+            }  
+            
+          })
+          socket.on('typing',function(typmsg){
+            $('#typing').text(typmsg);
+          })
+          socket.on('chat message', function(msg){
+            $('#typing').text("");
+            $('#messages').append($('<li>').text(msg));
+          });
+
+      });
+    </script>
+
+
+  </body>
+</html>
+    
